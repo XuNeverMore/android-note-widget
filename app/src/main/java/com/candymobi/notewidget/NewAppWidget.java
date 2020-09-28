@@ -6,9 +6,19 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.widget.RemoteViews;
+
+import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
+import com.candymobi.notewidget.utils.CircleTransformation;
 
 /**
  * Implementation of App Widget functionality.
@@ -20,10 +30,31 @@ public class NewAppWidget extends AppWidgetProvider {
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
-        CharSequence widgetText = NoteManager.getInstance().getNoteContent();
+        final NoteManager noteManager = NoteManager.getInstance();
+        CharSequence widgetText = (CharSequence) noteManager.getNoteContent();
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        final String bgPath = noteManager.getBgPath();
+        Glide.with(MyApp.getMyApp())
+                .asBitmap()
+                .transform(new CircleTransformation())
+                .load(bgPath)
+                .listener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        views.setImageViewBitmap(R.id.iv_bg, resource);
+                        return false;
+                    }
+                }).preload();
+
         views.setTextViewText(R.id.appwidget_text, widgetText);
+        PendingIntent pi = PendingIntent.getActivity(context, 1, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.rl_root, pi);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);

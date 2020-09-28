@@ -5,6 +5,13 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+<!--        <item name="buttonStyle"></item>-->
+        <item name="colorButtonNormal">#4caf65</item>
+        <item name="android:textColorPrimary">#ffffff</item>
+    </style>
+
+    <style name="Button.Custom" parent="Base.Widget.AppCompat.Button">
+
     </style>
 
 </resources>

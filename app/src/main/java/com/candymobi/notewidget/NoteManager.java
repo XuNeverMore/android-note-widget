@@ -34,4 +34,13 @@ public class NoteManager {
     public String getNoteContent() {
         return mSharedPreferences.getString(NOTE_CONTENT, null);
     }
+
+    public void saveBg(String imagePath) {
+        mSharedPreferences.edit().putString("imagePath", imagePath)
+                .apply();
+    }
+
+    public String getBgPath() {
+        return mSharedPreferences.getString("imagePath", null);
+    }
 }

@@ -2,4 +2,7 @@
     <string name="app_name">NoteWidget</string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="please_input">请输入...</string>
+    <string name="save">保存</string>
+    <string name="set_bg">设置背景</string>
 </resources>
