@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
         button.setOnClickListener(view -> {
-
             Editable text = edtContent.getText();
             String string = text.toString();
             noteManager.saveNote(string);
@@ -122,8 +121,8 @@ public class MainActivity extends AppCompatActivity {
             imagePath = uri.getPath();
         }
 
-        Glide.with(this).load(imagePath).into(mIvBg);
         NoteManager.getInstance().saveBg(imagePath);
+        Glide.with(this).load(imagePath).into(mIvBg);
 
     }
 

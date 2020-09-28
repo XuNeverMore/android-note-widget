@@ -7,6 +7,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Handler;
 import android.widget.RemoteViews;
@@ -37,7 +38,6 @@ public class NewAppWidget extends AppWidgetProvider {
         final String bgPath = noteManager.getBgPath();
         Glide.with(MyApp.getMyApp())
                 .asBitmap()
-                .transform(new CircleTransformation())
                 .load(bgPath)
                 .listener(new RequestListener<Bitmap>() {
                     @Override
@@ -47,17 +47,23 @@ public class NewAppWidget extends AppWidgetProvider {
 
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                        views.setImageViewBitmap(R.id.iv_bg, resource);
-                        return false;
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            views.setImageViewIcon(Icon.);
+//                        } else {
+                            views.setImageViewBitmap(R.id.iv_bg, resource);
+//                        }
+                        appWidgetManager.updateAppWidget(appWidgetId, views);
+                        return true;
                     }
-                }).preload();
+                })
+//                .transform(new CircleTransformation())
+                .preload();
 
         views.setTextViewText(R.id.appwidget_text, widgetText);
         PendingIntent pi = PendingIntent.getActivity(context, 1, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         views.setOnClickPendingIntent(R.id.rl_root, pi);
 
         // Instruct the widget manager to update the widget
-        appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
     public static void requestPlace(Context context) {
