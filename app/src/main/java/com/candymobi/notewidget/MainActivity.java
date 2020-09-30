@@ -13,10 +13,10 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,15 +30,19 @@ public class MainActivity extends AppCompatActivity {
     private static final int IMAGE_REQUEST_CODE = 1;
     private SharedPreferences mSharedPreferences;
     private ImageView mIvBg;
+    private int mWidgetId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (!NewAppWidget.hasWidget(this)) {
-            NewAppWidget.requestPlace(this);
-        }
 
+        Intent intent = getIntent();
+        mWidgetId = intent.getIntExtra(Const.WIDGET_ID, -1);
+        if (mWidgetId == -1) {
+            return;
+        }
+        Log.i(NewAppWidget.class.getSimpleName(), "onCreate: " + mWidgetId);
         initView();
     }
 
@@ -46,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         EditText edtContent = findViewById(R.id.edit_note);
         Button button = findViewById(R.id.btn_save);
         NoteManager noteManager = NoteManager.getInstance();
-        final String content = (String) noteManager.getNoteContent();
+        final String content = (String) noteManager.getNoteContent(mWidgetId);
         if (!TextUtils.isEmpty(content)) {
             edtContent.setText(content);
         }
@@ -54,8 +58,8 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(view -> {
             Editable text = edtContent.getText();
             String string = text.toString();
-            noteManager.saveNote(string);
-            NewAppWidget.update(this);
+            noteManager.saveNote(mWidgetId, string);
+            NewAppWidget.updateAppWidget(this, mWidgetId);
         });
 
         Button btnSetBg = findViewById(R.id.button_set_bg);
@@ -68,10 +72,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         mIvBg = findViewById(R.id.iv_bg);
-        String bgPath = noteManager.getBgPath();
+        String bgPath = noteManager.getBgPath(mWidgetId);
         if (!TextUtils.isEmpty(bgPath)) {
             Glide.with(this).load(bgPath).into(mIvBg);
-        }else {
+        } else {
             mIvBg.setImageDrawable(new ColorDrawable(0xffeeeeee));
         }
 
@@ -121,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
             imagePath = uri.getPath();
         }
 
-        NoteManager.getInstance().saveBg(imagePath);
+        NoteManager.getInstance().saveBg(mWidgetId, imagePath);
         Glide.with(this).load(imagePath).into(mIvBg);
 
     }

@@ -1,6 +1,10 @@
 package com.candymobi.notewidget;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 /**
  * @author xuchuanting
@@ -10,7 +14,7 @@ public class MyApp extends Application {
 
     private static MyApp sMyApp;
 
-    public static MyApp getMyApp() {
+    public static MyApp getInstance() {
         return sMyApp;
     }
 
@@ -18,5 +22,23 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         sMyApp = this;
+        IntentFilter filter = new IntentFilter(getWidgetAction());
+        registerReceiver(new EditBR(), filter);
+    }
+
+    public String getWidgetAction(){
+        return MainActivity.class.getName();
+    }
+
+    private static class EditBR extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int intExtra = intent.getIntExtra(Const.WIDGET_ID, -1);
+            Intent intent1 = new Intent(context, MainActivity.class);
+            intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent1.putExtra(Const.WIDGET_ID, intExtra);
+            context.startActivity(intent1);
+        }
     }
 }

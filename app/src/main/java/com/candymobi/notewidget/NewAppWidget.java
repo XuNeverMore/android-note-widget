@@ -7,9 +7,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Handler;
+import android.text.TextUtils;
+import android.util.Log;
 import android.widget.RemoteViews;
 
 import androidx.annotation.Nullable;
@@ -19,7 +20,6 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.candymobi.notewidget.utils.CircleTransformation;
 
 /**
  * Implementation of App Widget functionality.
@@ -28,15 +28,48 @@ public class NewAppWidget extends AppWidgetProvider {
 
     private static final String ACTION_REQUEST_PLACE = "action_request_place";
 
-    static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
-                                int appWidgetId) {
+    private static final String TAG = "NewAppWidget";
 
+    private static boolean PA = false;
+
+    public static void updateAppWidget(Context context,
+                                       int appWidgetId) {
+        Log.i(TAG, "updateAppWidget: " + appWidgetId);
+
+        AppWidgetManager appWidgetManager = (AppWidgetManager) context.getSystemService(Context.APPWIDGET_SERVICE);
         final NoteManager noteManager = NoteManager.getInstance();
-        CharSequence widgetText = (CharSequence) noteManager.getNoteContent();
+        CharSequence widgetText = noteManager.getNoteContent(appWidgetId);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
-        final String bgPath = noteManager.getBgPath();
-        Glide.with(MyApp.getMyApp())
+        final String bgPath = noteManager.getBgPath(appWidgetId);
+
+
+        views.setTextViewText(R.id.appwidget_text, widgetText);
+        Intent it = new Intent(context, NewAppWidget.class);
+        it.setAction(MyApp.getInstance().getWidgetAction());
+        it.putExtra(Const.WIDGET_ID, appWidgetId);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, it, 0);
+
+
+//        if (PA) {
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Const.WIDGET_ID, appWidgetId);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+            views.setOnClickPendingIntent(R.id.rl_root, pendingIntent);
+//        } else {
+//            Intent intent = new Intent(MyApp.getInstance().getWidgetAction());
+//            intent.putExtra(Const.WIDGET_ID, appWidgetId);
+//            PendingIntent pi = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+//            views.setOnClickPendingIntent(R.id.rl_root, pi);
+//        }
+
+        if (TextUtils.isEmpty(bgPath)) {
+            appWidgetManager.updateAppWidget(appWidgetId, views);
+            return;
+        }
+
+        Glide.with(MyApp.getInstance())
                 .asBitmap()
                 .load(bgPath)
                 .listener(new RequestListener<Bitmap>() {
@@ -50,7 +83,7 @@ public class NewAppWidget extends AppWidgetProvider {
 //                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 //                            views.setImageViewIcon(Icon.);
 //                        } else {
-                            views.setImageViewBitmap(R.id.iv_bg, resource);
+                        views.setImageViewBitmap(R.id.iv_bg, resource);
 //                        }
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                         return true;
@@ -59,9 +92,6 @@ public class NewAppWidget extends AppWidgetProvider {
 //                .transform(new CircleTransformation())
                 .preload();
 
-        views.setTextViewText(R.id.appwidget_text, widgetText);
-        PendingIntent pi = PendingIntent.getActivity(context, 1, new Intent(context, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.rl_root, pi);
 
         // Instruct the widget manager to update the widget
     }
@@ -92,22 +122,12 @@ public class NewAppWidget extends AppWidgetProvider {
         return appWidgetManager.getAppWidgetIds(componentName).length > 0;
     }
 
-    public static void update(Context context) {
-        AppWidgetManager appWidgetManager = (AppWidgetManager) context.getSystemService(Context.APPWIDGET_SERVICE);
-        ComponentName componentName = new ComponentName(context, NewAppWidget.class);
-
-        final int[] appWidgetIds = appWidgetManager.getAppWidgetIds(componentName);
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
-
-    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
         for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
+            updateAppWidget(context, appWidgetId);
         }
     }
 

@@ -14,7 +14,7 @@ public class NoteManager {
     private final SharedPreferences mSharedPreferences;
 
     private NoteManager() {
-        mSharedPreferences = MyApp.getMyApp().getSharedPreferences("note_list", Context.MODE_PRIVATE);
+        mSharedPreferences = MyApp.getInstance().getSharedPreferences("note_list", Context.MODE_PRIVATE);
     }
 
     public static NoteManager getInstance() {
@@ -24,23 +24,23 @@ public class NoteManager {
         return sInstance;
     }
 
-    public void saveNote(String string) {
+    public void saveNote(int widgetId, String string) {
         mSharedPreferences.edit()
-                .putString(NOTE_CONTENT, string)
+                .putString(NOTE_CONTENT + "_" + widgetId, string)
                 .apply();
     }
 
 
-    public String getNoteContent() {
-        return mSharedPreferences.getString(NOTE_CONTENT, null);
+    public String getNoteContent(int widgetId) {
+        return mSharedPreferences.getString(NOTE_CONTENT + "_" + widgetId, null);
     }
 
-    public void saveBg(String imagePath) {
-        mSharedPreferences.edit().putString("imagePath", imagePath)
+    public void saveBg(int widgetId, String imagePath) {
+        mSharedPreferences.edit().putString("imagePath" + "_" + widgetId, imagePath)
                 .apply();
     }
 
-    public String getBgPath() {
-        return mSharedPreferences.getString("imagePath", null);
+    public String getBgPath(int widgetId) {
+        return mSharedPreferences.getString("imagePath" + "_" + widgetId, null);
     }
 }
