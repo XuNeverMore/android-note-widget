@@ -10,7 +10,7 @@ import android.content.SharedPreferences;
 public class NoteManager {
 
     private static NoteManager sInstance;
-    private final String NOTE_CONTENT = "note_content";
+    private static final String NOTE_CONTENT = "note_content";
     private final SharedPreferences mSharedPreferences;
 
     private NoteManager() {

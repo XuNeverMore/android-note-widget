@@ -27,7 +27,7 @@ public class MyApp extends Application {
     }
 
     public String getWidgetAction(){
-        return MainActivity.class.getName();
+        return EditWidgetActivity.class.getName();
     }
 
     private static class EditBR extends BroadcastReceiver {
@@ -35,7 +35,7 @@ public class MyApp extends Application {
         @Override
         public void onReceive(Context context, Intent intent) {
             int intExtra = intent.getIntExtra(Const.WIDGET_ID, -1);
-            Intent intent1 = new Intent(context, MainActivity.class);
+            Intent intent1 = new Intent(context, EditWidgetActivity.class);
             intent1.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent1.putExtra(Const.WIDGET_ID, intExtra);
             context.startActivity(intent1);

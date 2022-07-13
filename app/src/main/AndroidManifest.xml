@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.candymobi.notewidget">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
 
     <application
         android:name=".MyApp"
@@ -35,7 +38,7 @@
                 android:resource="@xml/new_app_widget_info" />
         </receiver>
 
-        <activity android:name=".MainActivity" />
+        <activity android:name=".EditWidgetActivity" />
     </application>
 
 </manifest>

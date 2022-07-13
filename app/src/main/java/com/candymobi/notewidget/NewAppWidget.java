@@ -1,5 +1,6 @@
 package com.candymobi.notewidget;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -18,8 +19,10 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.candymobi.notewidget.utils.Util;
 
 /**
  * Implementation of App Widget functionality.
@@ -30,48 +33,38 @@ public class NewAppWidget extends AppWidgetProvider {
 
     private static final String TAG = "NewAppWidget";
 
-    private static boolean PA = false;
-
-    public static void updateAppWidget(Context context,
-                                       int appWidgetId) {
+    public static void updateAppWidget(Context context, int appWidgetId) {
         Log.i(TAG, "updateAppWidget: " + appWidgetId);
-
         AppWidgetManager appWidgetManager = (AppWidgetManager) context.getSystemService(Context.APPWIDGET_SERVICE);
         final NoteManager noteManager = NoteManager.getInstance();
         CharSequence widgetText = noteManager.getNoteContent(appWidgetId);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
         final String bgPath = noteManager.getBgPath(appWidgetId);
-
-
+        Log.i(TAG, "bgPath: " + bgPath);
         views.setTextViewText(R.id.appwidget_text, widgetText);
         Intent it = new Intent(context, NewAppWidget.class);
         it.setAction(MyApp.getInstance().getWidgetAction());
         it.putExtra(Const.WIDGET_ID, appWidgetId);
 //        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 1, it, 0);
-
-
 //        if (PA) {
-            Intent intent = new Intent(context, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(Const.WIDGET_ID, appWidgetId);
-            PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-            views.setOnClickPendingIntent(R.id.rl_root, pendingIntent);
-//        } else {
-//            Intent intent = new Intent(MyApp.getInstance().getWidgetAction());
-//            intent.putExtra(Const.WIDGET_ID, appWidgetId);
-//            PendingIntent pi = PendingIntent.getBroadcast(context, 2, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-//            views.setOnClickPendingIntent(R.id.rl_root, pi);
-//        }
+        Intent intent = new Intent(context, EditWidgetActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Const.WIDGET_ID, appWidgetId);
+        @SuppressLint("UnspecifiedImmutableFlag") PendingIntent pendingIntent =
+                PendingIntent.getActivity(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.rl_root, pendingIntent);
 
         if (TextUtils.isEmpty(bgPath)) {
             appWidgetManager.updateAppWidget(appWidgetId, views);
             return;
         }
 
+        //加载图片
         Glide.with(MyApp.getInstance())
                 .asBitmap()
                 .load(bgPath)
+                .override(1024)
                 .listener(new RequestListener<Bitmap>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
@@ -80,16 +73,13 @@ public class NewAppWidget extends AppWidgetProvider {
 
                     @Override
                     public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            views.setImageViewIcon(Icon.);
-//                        } else {
                         views.setImageViewBitmap(R.id.iv_bg, resource);
-//                        }
                         appWidgetManager.updateAppWidget(appWidgetId, views);
+                        Log.i(TAG, "onResourceReady: " + appWidgetId);
                         return true;
                     }
                 })
-//                .transform(new CircleTransformation())
+                .transform(new RoundedCorners(Util.dp2px(context, 20)))
                 .preload();
 
 
@@ -140,6 +130,12 @@ public class NewAppWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+    @Override
+    public void onDeleted(Context context, int[] appWidgetIds) {
+        super.onDeleted(context, appWidgetIds);
+
     }
 }
 
