@@ -109,6 +109,7 @@ public class NewAppWidget extends AppWidgetProvider {
                                 ComponentName componentName = new ComponentName(context, NewAppWidget.class);
                                 appWidgetManager.requestPinAppWidget(componentName, null, pi);
                             } catch (IllegalStateException e) {
+                                //
                             }
                         },
                         300);
